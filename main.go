@@ -10,7 +10,7 @@ import (
 
 func main() {
 	var err error
-	var r = repo.NewSomeRepo(&sql.DB{}, nil)
+	var r = repo.NewSomeRepo(&sql.DB{})
 
 	err = r.DoTransaction(func(txRepo repo.SomeRepo) (err error) {
 		return txRepo.Ping(context.Background())
