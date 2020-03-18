@@ -5,14 +5,14 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/andrdru/sqltx/repo"
+	"github.com/andrdru/sqltx/example/repo"
 )
 
 func main() {
 	var err error
-	var r = repo.NewSomeRepo(&sql.DB{})
+	var r = repo.NewMyRepo(&sql.DB{})
 
-	err = r.DoTransaction(func(txRepo repo.SomeRepo) (err error) {
+	err = r.DoTransaction(func(txRepo repo.MyRepo) (err error) {
 		return txRepo.Ping(context.Background())
 	})
 
