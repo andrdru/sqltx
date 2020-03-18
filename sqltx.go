@@ -20,7 +20,7 @@ type (
 		QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 	}
 
-	// Repo tx helper
+	//Tx repo tx helper
 	Tx interface {
 		DoTx(fn func(Tx) error) (err error)
 	}
