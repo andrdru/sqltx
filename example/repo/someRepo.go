@@ -22,6 +22,7 @@ type (
 func NewMyRepo(db sqltx.QueryExecutor) MyRepo {
 	return &myRepo{
 		db: db,
+		Tx: sqltx.NewTx(db),
 	}
 }
 

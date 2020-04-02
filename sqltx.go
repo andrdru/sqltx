@@ -31,6 +31,12 @@ type (
 	}
 )
 
+func NewTx(db QueryExecutor) Tx {
+	return &tx{
+		db: db,
+	}
+}
+
 // DoTx wrap repository calls into transaction
 //
 // func (m *myRepo) DoTransaction(action func(txRepo MyRepo) (err error)) (err error) {

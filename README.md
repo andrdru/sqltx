@@ -21,6 +21,13 @@ type (
 	}
 )
 
+func NewMyRepo(db sqltx.QueryExecutor) MyRepo {
+	return &myRepo{
+		db: db,
+		Tx: sqltx.NewTx(db),
+	}
+}
+
 func (m *myRepo) DoTransaction(action func(txRepo MyRepo) (err error)) (err error) {
 	return m.DoTx(func(tx sqltx.Tx) error {
 		var repo = NewMyRepo(m.db)
