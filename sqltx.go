@@ -23,6 +23,7 @@ type (
 	//Tx repo tx helper
 	Tx interface {
 		DoTx(fn func(Tx) error) (err error)
+		DB() (db QueryExecutor)
 	}
 
 	// tx tx helper implementation
@@ -68,6 +69,11 @@ func (r *tx) DoTx(fn func(Tx) error) (err error) {
 	}
 
 	return tx.Commit()
+}
+
+// DB get current QueryExecutor
+func (r *tx) DB() (db QueryExecutor) {
+	return r.db
 }
 
 // withTx returns Tx instance with sql.Tx as QueryExecutor
