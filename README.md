@@ -31,7 +31,7 @@ func (m *user) DoTransaction(action func(txRepo User) (err error)) (err error) {
 err = userRepo.DoTransaction(func(txRepo repo.User) (err error) {
   err = txRepo.CreateUser(ctx, 1, "Vasya")
   if err != nil {
-    log.Fatalf("could not get user: %s", name)
+    return err
   }
   
   return nil
