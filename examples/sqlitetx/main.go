@@ -6,21 +6,18 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/andrdru/sqltx/examples/sqlitetx/repo"
 )
 
-const dbname = "sqlite.db"
+const dsn = "file:sqlite.db?mode=memory"
 
 func main() {
 	var ctx = context.Background()
 
-	_ = os.Remove(dbname) // drop old database on restart
-
-	var db, err = sql.Open("sqlite3", dbname)
+	var db, err = sql.Open("sqlite3", dsn)
 	if err != nil {
 		log.Fatalf("could not open db: %s\n", err)
 	}
