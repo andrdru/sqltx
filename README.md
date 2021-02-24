@@ -8,27 +8,31 @@ Helper for sql transactions
 
 ## Usage
 
+see [examples](/examples)
+
 ```go
 // add helper to repo
 
 User interface {
   sqltx.Tx
-  DoTransaction(action func (txRepo User) (err error)) (err error)
+
+  TX(action func(txRepo User) error) error
 }
 
-// DoTransaction repository transactions helper
-func (m *user) DoTransaction(action func(txRepo User) (err error)) (err error) {
-  return m.DoTx(func(tx sqltx.Tx) error {
-    var repo = NewUser(tx.DB())
-    return action(repo)
-  })
+// TX simplify DoTransaction call for User interface
+func (m *user) TX(action func(txRepo User) error) error {
+  return m.DoTransaction(
+    func(tx sqltx.QueryExecutor) sqltx.Tx { return NewUser(tx) },
+    func(txRepo sqltx.Tx) error { return action(txRepo.(User)) },
+  )
 }
+
 ```
 
 ```go
 // call
 
-err = userRepo.DoTransaction(func(txRepo repo.User) (err error) {
+err = userRepo.TX(func(txRepo repo.User) (err error) {
   err = txRepo.CreateUser(ctx, 1, "Vasya")
   if err != nil {
     return err
@@ -38,8 +42,7 @@ err = userRepo.DoTransaction(func(txRepo repo.User) (err error) {
 }
 
 if err != nil {
-  log.Fatalf("transaction: %s", err)
+  log.Fatalf("transaction rollback: %s", err)
 }
 ```
 
-full example in [examples](/examples)

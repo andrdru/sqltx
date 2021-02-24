@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
+	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/andrdru/sqltx/examples/sqlitetx/repo"
 )
@@ -55,7 +55,8 @@ func createTable(ctx context.Context, db *sql.DB) {
 
 func commitTX(ctx context.Context, userRepo repo.User) {
 	var name string
-	var err = userRepo.DoTransaction(func(txRepo repo.User) (err error) {
+
+	var err = userRepo.TX(func(txRepo repo.User) (err error) {
 		err = txRepo.CreateUser(ctx, 1, "Vasya")
 		if err != nil {
 			log.Fatalf("could not get user: %s\n", name)
@@ -71,8 +72,9 @@ func commitTX(ctx context.Context, userRepo repo.User) {
 
 		return nil
 	})
+
 	if err != nil {
-		log.Fatalf("transaction: %s\n", err)
+		log.Fatalf("transaction rollback: %s\n", err)
 	}
 
 	// user can be accessed from repo now
@@ -83,7 +85,7 @@ func commitTX(ctx context.Context, userRepo repo.User) {
 
 func rollbackTX(ctx context.Context, userRepo repo.User) {
 	var name string
-	var err = userRepo.DoTransaction(func(txRepo repo.User) (err error) {
+	var err = userRepo.TX(func(txRepo repo.User) (err error) {
 		err = txRepo.CreateUser(ctx, 2, "Petya")
 		if err != nil {
 			log.Fatalf("could not get user: %s\n", name)
@@ -100,7 +102,7 @@ func rollbackTX(ctx context.Context, userRepo repo.User) {
 		return errors.New("here is rollback tx example")
 	})
 	if err != nil {
-		fmt.Printf("tx rolled back: err '%+v'\n", err)
+		fmt.Printf("transaction rollback: err '%+v'\n", err)
 	}
 
 	// no user here, cause of rollback

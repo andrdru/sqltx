@@ -9,7 +9,8 @@ import (
 type (
 	User interface {
 		sqltx.Tx
-		DoTransaction(action func(txRepo User) (err error)) (err error)
+
+		TX(action func(txRepo User) error) error
 
 		CreateUser(ctx context.Context, id int64, name string) (err error)
 		GetUserNameByID(ctx context.Context, id int64) (name string, err error)
@@ -26,12 +27,12 @@ func NewUser(db sqltx.QueryExecutor) User {
 	}
 }
 
-// DoTransaction repository transactions helper
-func (m *user) DoTransaction(action func(txRepo User) (err error)) (err error) {
-	return m.DoTx(func(tx sqltx.Tx) error {
-		var repo = NewUser(tx.DB())
-		return action(repo)
-	})
+// TX simplify DoTransaction call for User interface
+func (m *user) TX(action func(txRepo User) error) error {
+	return m.DoTransaction(
+		func(tx sqltx.QueryExecutor) sqltx.Tx { return NewUser(tx) },
+		func(txRepo sqltx.Tx) error { return action(txRepo.(User)) },
+	)
 }
 
 func (m *user) GetUserNameByID(ctx context.Context, id int64) (name string, err error) {

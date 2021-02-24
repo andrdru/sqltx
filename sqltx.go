@@ -20,9 +20,9 @@ type (
 		QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 	}
 
-	//Tx repo tx helper
+	// Tx repo tx helper
 	Tx interface {
-		DoTx(fn func(Tx) error) (err error)
+		DoTransaction(construct func(tx QueryExecutor) Tx, action func(txRepo Tx) error) (err error)
 		DB() (db QueryExecutor)
 	}
 
@@ -32,21 +32,37 @@ type (
 	}
 )
 
+var _ Tx = &tx{}
+
 func NewTx(db QueryExecutor) Tx {
 	return &tx{
 		db: db,
 	}
 }
 
-// DoTx wrap repository calls into transaction
+// DB get current QueryExecutor
+func (r *tx) DB() (db QueryExecutor) {
+	return r.db
+}
+
+// DoTransaction repository transactions helper
 //
-// func (m *myRepo) DoTransaction(action func(txRepo MyRepo) (err error)) (err error) {
-//	return m.DoTx(func(tx sqltx.Tx) error {
-//		var repo = NewMyRepo(m.db)
-//		return action(repo)
-//	})
+// // TX simplify DoTransaction call for MyRepo interface
+// func (m *user) TX(action func(txRepo MyRepo) error) error {
+//	return m.DoTransaction(
+//		func(tx sqltx.QueryExecutor) sqltx.Tx { return NewMyRepo(tx) },
+//		func(txRepo sqltx.Tx) error { return action(txRepo.(MyRepo)) },
+//	)
 // }
-func (r *tx) DoTx(fn func(Tx) error) (err error) {
+//
+func (r *tx) DoTransaction(construct func(tx QueryExecutor) Tx, action func(txRepo Tx) error) (err error) {
+	return r.doTx(func(tx Tx) error {
+		return action(construct(tx.DB()))
+	})
+}
+
+// DoTx wrap repository calls into transaction
+func (r *tx) doTx(fn func(Tx) error) (err error) {
 	var db *sql.DB
 	var ok bool
 
@@ -69,11 +85,6 @@ func (r *tx) DoTx(fn func(Tx) error) (err error) {
 	}
 
 	return tx.Commit()
-}
-
-// DB get current QueryExecutor
-func (r *tx) DB() (db QueryExecutor) {
-	return r.db
 }
 
 // withTx returns Tx instance with sql.Tx as QueryExecutor
