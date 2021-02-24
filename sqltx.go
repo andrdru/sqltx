@@ -26,13 +26,17 @@ type (
 		DB() (db QueryExecutor)
 	}
 
-	// tx tx helper implementation
+	// tx helper implementation
 	tx struct {
 		db QueryExecutor
 	}
 )
 
-var _ Tx = &tx{}
+var (
+	_ Tx            = &tx{}
+	_ QueryExecutor = &sql.Tx{}
+	_ QueryExecutor = &sql.DB{}
+)
 
 func NewTx(db QueryExecutor) Tx {
 	return &tx{
@@ -48,7 +52,7 @@ func (r *tx) DB() (db QueryExecutor) {
 // DoTransaction repository transactions helper
 //
 // // TX simplify DoTransaction call for MyRepo interface
-// func (m *user) TX(action func(txRepo MyRepo) error) error {
+// func (m *myRepo) TX(action func(txRepo MyRepo) error) error {
 //	return m.DoTransaction(
 //		func(tx sqltx.QueryExecutor) sqltx.Tx { return NewMyRepo(tx) },
 //		func(txRepo sqltx.Tx) error { return action(txRepo.(MyRepo)) },
