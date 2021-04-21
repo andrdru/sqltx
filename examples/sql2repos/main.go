@@ -57,36 +57,35 @@ func commitTX(ctx context.Context, userRepo repo.User, addressRepo repo.Address)
 	var name string
 
 	var err = userRepo.TX(func(txUser repo.User) (err error) {
-		return addressRepo.TX(func(txAddress repo.Address) error {
+		var txAddress = repo.NewAddress(txUser.DB())
 
-			err = txUser.CreateUser(ctx, 1, "Vasya")
-			if err != nil {
-				log.Fatalf("could not create user: %s\n", err)
-			}
+		err = txUser.CreateUser(ctx, 1, "Vasya")
+		if err != nil {
+			log.Fatalf("could not create user: %s\n", err)
+		}
 
-			err = txAddress.CreateAddress(ctx, 1, "Main")
-			if err != nil {
-				log.Fatalf("could not create address: %s\n", err)
-			}
+		err = txAddress.CreateAddress(ctx, 1, "Main")
+		if err != nil {
+			log.Fatalf("could not create address: %s\n", err)
+		}
 
-			// get user created in TX
-			name, err = txUser.GetUserNameByID(ctx, 1)
-			fmt.Printf("user inside transaction: name '%s' err '%+v'\n", name, err)
+		// get user created in TX
+		name, err = txUser.GetUserNameByID(ctx, 1)
+		fmt.Printf("user inside transaction: name '%s' err '%+v'\n", name, err)
 
-			// get address created in TX
-			name, err = txAddress.GetAddressStreetByID(ctx, 1)
-			fmt.Printf("address inside transaction: name '%s' err '%+v'\n", name, err)
+		// get address created in TX
+		name, err = txAddress.GetAddressStreetByID(ctx, 1)
+		fmt.Printf("address inside transaction: name '%s' err '%+v'\n", name, err)
 
-			// no access before commit
-			name, err = userRepo.GetUserNameByID(ctx, 1)
-			fmt.Printf("user before commit: name '%s' err '%+v'\n", name, err)
+		// no access before commit
+		name, err = userRepo.GetUserNameByID(ctx, 1)
+		fmt.Printf("user before commit: name '%s' err '%+v'\n", name, err)
 
-			// no access before commit
-			name, err = addressRepo.GetAddressStreetByID(ctx, 1)
-			fmt.Printf("address before commit: street '%s' err '%+v'\n", name, err)
+		// no access before commit
+		name, err = addressRepo.GetAddressStreetByID(ctx, 1)
+		fmt.Printf("address before commit: street '%s' err '%+v'\n", name, err)
 
-			return nil
-		})
+		return nil
 	})
 
 	if err != nil {

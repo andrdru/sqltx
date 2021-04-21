@@ -1,4 +1,4 @@
-module github.com/andrdru/sqltx/examples/sqlite2repos
+module github.com/andrdru/sqltx/examples/sql2repos
 
 go 1.15
 
