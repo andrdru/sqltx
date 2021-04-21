@@ -1,0 +1,15 @@
+version: "3"
+services:
+  db:
+    image: postgres:13.1-alpine
+    hostname: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "pgdb"
+      POSTGRES_USER: "pguser"
+      POSTGRES_PASSWORD: "pgpassword"
+      DB_EXPOSED_PORT: "5432"
+    volumes:
+      - ./db_data_postgres:/var/lib/postgresql/data
